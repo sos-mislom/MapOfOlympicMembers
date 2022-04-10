@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MapYandex</string>
+    <string name="bottom_sheet_peek">MapYandex</string>
+    <string name="bottom_sheet_content">MapYandex</string>
+</resources>
