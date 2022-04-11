@@ -1,23 +1,41 @@
 package com.example.mapyandex;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.ContextCompat;
 
+import com.cocosw.bottomsheet.BottomSheet;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
+import com.yandex.mapkit.ScreenPoint;
 import com.yandex.mapkit.geometry.Point;
 import com.yandex.mapkit.layers.GeoObjectTapEvent;
 import com.yandex.mapkit.layers.GeoObjectTapListener;
@@ -34,56 +52,62 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity implements GeoObjectTapListener, InputListener {
     private final String MAPKIT_API_KEY = "26047576-121f-4108-a0be-a1c7e90cfde7";
     private final Point TARGET_LOCATION = new Point(59.936760, 30.314673);
-
     private MapView mapView;
     private TextView content;
     private String season;
+    BottomSheetBehavior bottomSheetBehavior;
+    ConstraintLayout llBottomSheet;
     private String country;
+    TableLayout tblayoutl;
+    Geocoder geocoder;
 
     private AsyncTask<String, Void, java.util.Map<String, ArrayList>> thread;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         MapKitFactory.setApiKey(MAPKIT_API_KEY);
         MapKitFactory.initialize(this);
-        // Now MapView can be created.
         setContentView(R.layout.activity_main);
         super.onCreate(savedInstanceState);
         mapView = (MapView) findViewById(R.id.mapview);
 
-        // And to show what can be done with it, we move the camera to the center of Saint Petersburg.
-        mapView.getMap().move(
-                new CameraPosition(TARGET_LOCATION, 13.0f, 0.0f, 0.0f),
-                new Animation(Animation.Type.SMOOTH, 3),
-                null);
-
-
+        getStart();season = "summer";
+        geocoder = new Geocoder(this, Locale.getDefault());
         mapView.getMap().addTapListener(this);
         mapView.getMap().addInputListener(this);
-        getStart();
+        mapView.setZoomFocusPoint(new ScreenPoint(2.f, 2.f));
+
+        llBottomSheet = (ConstraintLayout) findViewById(R.id.bottomSheet);
+
+        bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottomSheetBehavior.setPeekHeight(100);
+        bottomSheetBehavior.setHideable(false);
+
     }
     private void getStart(){
-        season = "winter";
-        country = "fra";
         thread = new asyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
+
+
     public Bitmap drawSimpleBitmap(String number) {
-        int picSize = 20;
+        int picSize = 600;
         Bitmap bitmap = Bitmap.createBitmap(picSize, picSize, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        // отрисовка плейсмарка
         Paint paint = new Paint();
-        paint.setColor(Color.GREEN);
-        paint.setStyle(Paint.Style.FILL);
-        canvas.drawCircle(picSize / 2, picSize / 2, picSize / 2, paint);
-        // отрисовка текста
         paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawRect(picSize / 2, picSize / 2, picSize / 2, picSize / 2, paint);
+        paint.setColor(Color.BLACK);
         paint.setAntiAlias(true);
-        paint.setTextSize(10);
+        paint.setTextSize(60);
         paint.setTextAlign(Paint.Align.CENTER);
         canvas.drawText(number, picSize / 2,
                 picSize / 2 - ((paint.descent() + paint.ascent()) / 2), paint);
@@ -91,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
     }
     @Override
     protected void onStop() {
-        // Activity onStop call must be passed to both MapView and MapKit instance.
         mapView.onStop();
         MapKitFactory.getInstance().onStop();
         super.onStop();
@@ -99,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
 
     @Override
     protected void onStart() {
-        // Activity onStart call must be passed to both MapView and MapKit instance.
         super.onStart();
         MapKitFactory.getInstance().onStart();
         mapView.onStart();
@@ -122,9 +144,13 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
     @Override
     public void onMapTap(@NonNull Map map, @NonNull Point point) {
         Location loc = new Location(String.valueOf(point));
-        Log.e("loc", loc.toString());
-
         mapView.getMap().deselectGeoObject();
+
+        try {
+            List<Address> location = geocoder.getFromLocation(point.getLatitude(), point.getLongitude(), 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -146,14 +172,103 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
         protected java.util.Map<String, ArrayList> doInBackground(String... parameter) {
             OlymParsing op = new OlymParsing();
             String str = String.valueOf(season);
-            String str_c = String.valueOf(country);
-            return GetCountryMedals(op, str_c);
+            return GetMedals(op, str);
         }
 
         @Override
         protected void onPostExecute(java.util.Map<String, ArrayList> result) {
             super.onPostExecute(result);
+            tblayoutl = (TableLayout) findViewById(R.id.medalLayout);
+            for (String сountry: result.keySet()) {
+                TableRow row_of_country = new TableRow(MainActivity.this);
+                TableLayout tbl_of_all_content = new TableLayout(MainActivity.this);
 
+                ArrayList<String> array = result.get(сountry);
+                if (array.size() > 5) {
+                    TextView ct = new TextView(MainActivity.this);
+                    TableRow.LayoutParams trLayoutParams = new TableRow.LayoutParams();
+                    trLayoutParams.setMargins(7, 7, 7, 7);
+
+
+                    ct.setText(сountry);
+                    ct.setTextSize(25);
+                    ct.setPadding(5, 0, 0, 0);
+                    row_of_country.addView(ct);
+                    ct.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            try {
+                                List<Address> for_mark = geocoder.getFromLocationName(String.valueOf(ct.getText()), 1);
+                                Point target = new Point(for_mark.get(0).getLatitude(), for_mark.get(0).getLongitude());
+                                mapView.getMap().getMapObjects().clear();
+                                mapView.getMap().getMapObjects().addPlacemark(target,
+                                        ImageProvider.fromBitmap(drawSimpleBitmap(String.valueOf(ct.getText()))));
+                                mapView.getMap().move(
+                                        new CameraPosition(target, 4.5f, 3.0f, 1.0f),
+                                        new Animation(Animation.Type.LINEAR, 3),
+                                        null);
+                                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    TableRow tbl_of_medals = new TableRow(MainActivity.this);
+
+                    TextView cu_medal = new TextView(MainActivity.this);
+                    cu_medal.setText(array.get(2));
+                    cu_medal.setTextSize(20);
+                    cu_medal.setLayoutParams(trLayoutParams);
+                    cu_medal.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.cu));
+                    tbl_of_medals.addView(cu_medal);
+
+                    TextView sb_medal = new TextView(MainActivity.this);
+                    sb_medal.setText(array.get(3));
+                    sb_medal.setTextSize(20);
+                    sb_medal.setLayoutParams(trLayoutParams);
+                    sb_medal.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.sb));
+                    tbl_of_medals.addView(sb_medal);
+
+                    TextView br_medal = new TextView(MainActivity.this);
+                    br_medal.setText(array.get(4));
+                    br_medal.setTextSize(20);
+                    br_medal.setLayoutParams(trLayoutParams);
+                    br_medal.setTextColor(ContextCompat.getColor(MainActivity.this, R.color.br));
+                    tbl_of_medals.addView(br_medal);
+
+                   TextView all_medal = new TextView(MainActivity.this);
+                   all_medal.setText("Всего: " + array.get(5));
+                   all_medal.setTextSize(20);
+                   all_medal.setLayoutParams(trLayoutParams);
+                   tbl_of_medals.addView(all_medal);
+
+                    tbl_of_all_content.addView(tbl_of_medals);
+
+                }
+                tblayoutl.addView(row_of_country);
+                tblayoutl.addView(tbl_of_all_content);
+            }
+        }
+    }
+
+    public class AutoCloseBottomSheetBehavior<V extends View> extends BottomSheetBehavior<V> {
+        public AutoCloseBottomSheetBehavior(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+        @Override
+        public boolean onInterceptTouchEvent(CoordinatorLayout parent, V child, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN &&
+                    getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                Rect outRect = new Rect();
+                child.getGlobalVisibleRect(outRect);
+
+                if (!outRect.contains((int) event.getRawX(), (int) event.getRawY())) {
+                    setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            }
+            return super.onInterceptTouchEvent(parent, child, event);
         }
     }
 }

@@ -2,4 +2,8 @@
     <string name="app_name">MapYandex</string>
     <string name="bottom_sheet_peek">MapYandex</string>
     <string name="bottom_sheet_content">MapYandex</string>
+    <string name="winter">Зима</string>
+    <string name="summer">лето</string>
+    <string name="olympfo">OLYMPFO</string>
+    <string name="olyparse">OLYPARSE</string>
 </resources>
