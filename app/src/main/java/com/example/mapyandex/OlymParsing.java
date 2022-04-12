@@ -73,7 +73,6 @@ public class OlymParsing {
             Response html = p.get(this.url + String.format("country/profile/%s.html", country));
             Document document = Jsoup.parseBodyFragment(html.toString());
             Elements table = document.select("table[class=main-tb tb-medals-2]");
-            Document document_of_medals = Jsoup.parseBodyFragment(table.toString());
             Elements table_of_medals = document.select("tr[class=medals-places]");
             Map<String, ArrayList> dict = new LinkedHashMap<>();
             country = "";
