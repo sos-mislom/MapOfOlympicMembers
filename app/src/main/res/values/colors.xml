@@ -10,5 +10,7 @@
     <color name="br">#CD7F32</color>
     <color name="sb">#c5c9c7</color>
     <color name="cu">#FFD700</color>
-
+    <color name="summer">#FFFCE9</color>
+    <color name="summer_plus">#FFF9D2</color>
+    <color name="winter">#D9EEFF</color>
 </resources>

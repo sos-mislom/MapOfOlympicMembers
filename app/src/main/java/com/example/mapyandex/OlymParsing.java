@@ -72,20 +72,24 @@ public class OlymParsing {
     public Map<String, ArrayList> getMedalsOfOneCountry(String country){
             Response html = p.get(this.url + String.format("country/profile/%s.html", country));
             Document document = Jsoup.parseBodyFragment(html.toString());
-            Elements table = document.select("table[class=main-tb tb-medals-2]");
-            Elements table_of_medals = document.select("tr[class=medals-places]");
+            ArrayList<String> urls = new ArrayList<>();
+            for (Element row : document.select("div[class=item-border noc-simbols]")){
+                String row_str = row.toString();
+                List<String> wordList1 = Arrays.asList(row_str.split("c=\""));
+                List<String> wordList2 = Arrays.asList(wordList1.get(wordList1.size()-1).split("\""));
+                urls.add("https://olympteka.ru/" + wordList2.get(0));
+            }
             Map<String, ArrayList> dict = new LinkedHashMap<>();
             country = "";
             Integer counter = 0;
-            for (Element layout : table_of_medals) {
-
+            for (Element layout : document.select("tr[class=medals-places]")) {
                 ArrayList<String> content = new ArrayList<>();
                 for (Element rows : layout.select("td")) {
                     String row_less;
                     row_less = String.valueOf(rows).replace("<sup>", "").replace("</sup>", "").replace("<td>", "").replace("</td>", "");
                     if (counter == 1){
                         List<String> wordList1 = Arrays.asList(row_less.split(" "));
-                        List<String> wordList2 = Arrays.asList(wordList1.get(wordList1.size()-2).split(">"));
+                        List<String> wordList2 = Arrays.asList(wordList1.get(2).split(">"));
                         content.add(wordList2.get(wordList2.size()-1));
                         country = row_less.replaceAll("[^А-я]", "");
                     } else if (counter ==11) {
@@ -97,6 +101,7 @@ public class OlymParsing {
                 }
                 if (content != null && content.size() > 0){
                     dict.put(country, content);
+                    dict.put("src", urls);
                     counter = 0;
                 }
 
