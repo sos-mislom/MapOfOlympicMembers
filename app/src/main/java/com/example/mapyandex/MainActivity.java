@@ -38,6 +38,7 @@ import com.yandex.mapkit.Animation;
 import com.yandex.mapkit.MapKitFactory;
 import com.yandex.mapkit.ScreenPoint;
 import com.yandex.mapkit.geometry.Point;
+import com.yandex.mapkit.geometry.Polyline;
 import com.yandex.mapkit.layers.GeoObjectTapEvent;
 import com.yandex.mapkit.layers.GeoObjectTapListener;
 import com.yandex.mapkit.map.CameraPosition;
@@ -220,6 +221,13 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
             super.onPostExecute(result);
             tblayoutl = (TableLayout) findViewById(R.id.medalLayout);
             Button summer_but = new Button(MainActivity.this);
+            Button winter_but = new Button(MainActivity.this);
+
+            if (season == "summer"){
+                summer_but.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.teal_700));
+            } else if (season == "winter"){
+                winter_but.setBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.teal_700));
+            }
             summer_but.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -228,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
                 }
             });
             summer_but.setText(R.string.summer);
-            Button winter_but = new Button(MainActivity.this);
+
             winter_but.setText(R.string.winter);
             winter_but.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -260,6 +268,7 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
                         @Override
                         public void onClick(View v) {
                             try {
+                                Log.e("count", ct.getText().toString());
                                 List<Address> for_mark = geocoder.getFromLocationName(String.valueOf(ct.getText()), 1);
                                 Point target = new Point(for_mark.get(0).getLatitude(), for_mark.get(0).getLongitude());
                                 mapView.getMap().getMapObjects().clear();
@@ -368,12 +377,18 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
                                 List<Address> for_mark = geocoder.getFromLocationName(String.valueOf(ct.getText()), 1);
                                 Point target = new Point(for_mark.get(0).getLatitude(), for_mark.get(0).getLongitude());
 
+                                mapView.getMap().getMapObjects().addPlacemark(target,
+                                        ImageProvider.fromBitmap(drawSimpleBitmap(String.valueOf(ct.getText()))));
+
                                 List<Address> for_mark1 = geocoder.getFromLocationName(country_truly, 1);
                                 Point target1 = new Point(for_mark1.get(0).getLatitude(), for_mark1.get(0).getLongitude());
-
-                                mapView.getMap().getMapObjects().addPolyline(target, target1);
+                                List<Point> list_of_points = new ArrayList<>();
+                                list_of_points.add(target);
+                                list_of_points.add(target1);
+                                Polyline POLYLINE = new Polyline(list_of_points);
+                                mapView.getMap().getMapObjects().addPolyline(POLYLINE);
                                 mapView.getMap().move(
-                                        new CameraPosition(target, 4.5f, 3.0f, 1.0f),
+                                        new CameraPosition(target, 2.5f, 3.0f, 1.0f),
                                         new Animation(Animation.Type.LINEAR, 3),
                                         null);
                                 if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
