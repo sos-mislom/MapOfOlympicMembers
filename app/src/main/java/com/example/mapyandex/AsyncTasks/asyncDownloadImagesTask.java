@@ -1,0 +1,37 @@
+package com.example.mapyandex.AsyncTasks;
+
+import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.widget.ImageView;
+
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+public class asyncDownloadImagesTask extends AsyncTask<ImageView, Void, Bitmap> {
+    @SuppressLint("StaticFieldLeak")
+    ImageView imageView = null;
+    @Override
+    protected Bitmap doInBackground(ImageView... imageViews) {
+        this.imageView = imageViews[0];
+        return download_Image((String)imageView.getTag());
+    }
+    @Override
+    protected void onPostExecute(Bitmap result) {
+        imageView.setImageBitmap(result);
+    }
+    private Bitmap download_Image(String url) {
+        Bitmap bmp;
+        try{
+            URL ulrn = new URL(url);
+            HttpURLConnection con = (HttpURLConnection)ulrn.openConnection();
+            InputStream is = con.getInputStream();
+            bmp = BitmapFactory.decodeStream(is);
+            if (null != bmp)
+                return bmp;
+        }catch(Exception ignored){}
+        return null;
+    }
+}

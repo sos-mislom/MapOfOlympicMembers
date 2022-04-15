@@ -1,75 +1,74 @@
-package com.example.mapyandex;
+package com.example.mapyandex.Parse;
 
-import android.annotation.SuppressLint;
+import static com.example.mapyandex.MainActivity.checkConnection;
+
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import java.io.IOException;
+import com.example.mapyandex.Requests.Requests;
+import com.example.mapyandex.Requests.Response;
 
 import org.jsoup.Jsoup;
-
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class OlymParsing {
-    private Post p;
+    private Requests p;
     private String url;
 
     public OlymParsing() {
         this.url = "https://olympteka.ru/olymp/";
-        this.p = new Post();
+        this.p = new Requests();
         }
 
     public Map<String, ArrayList> getAllMedals(String season){
-        Response html = p.get(this.url + String.format("different/medals/%s.html", season));
-        Document document = Jsoup.parseBodyFragment(html.toString());
-        Elements table = document.select("table[class=main-tb tb-eo tb-medals]");
-        Map<String, ArrayList> dict = new LinkedHashMap<>();
-        String country = "";
-        Integer counter = 0;
+        if (checkConnection()){
+            Response html = p.get(this.url + String.format("different/medals/%s.html", season));
+            Document document = Jsoup.parseBodyFragment(html.toString());
+            Elements table = document.select("table[class=main-tb tb-eo tb-medals]");
+            Map<String, ArrayList> dict = new LinkedHashMap<>();
+            String country = "";
+            Integer counter = 0;
 
-        for (Element layout : table.select("tr")) {
-            ArrayList<String> content = new ArrayList<>();
-            for (Element rows : layout.select("td")) {
-                String row_less = String.valueOf(rows).replace("<td>", "").replace("</td>", "");
-                if (row_less.contains("sup")){
-                    List<String> wordList = Arrays.asList(row_less.split(" "));
-                    row_less = wordList.get(0);
-                }
-                if (counter == 1){
-                    if (row_less.contains("fl")){
-                        List<String> wordList1 = Arrays.asList(row_less.split("fl-"));
-                        List<String> wordList2 = Arrays.asList(wordList1.get(1).split("\""));
-                        content.add(wordList2.get(0));
+            for (Element layout : table.select("tr")) {
+                ArrayList<String> content = new ArrayList<>();
+                for (Element rows : layout.select("td")) {
+                    String row_less = String.valueOf(rows).replace("<td>", "").replace("</td>", "");
+                    if (row_less.contains("sup")){
+                        List<String> wordList = Arrays.asList(row_less.split(" "));
+                        row_less = wordList.get(0);
                     }
-                    country = row_less.replaceAll("[^А-я]", "");
-                } else {
-                    content.add(row_less);
+                    if (counter == 1){
+                        if (row_less.contains("fl")){
+                            List<String> wordList1 = Arrays.asList(row_less.split("fl-"));
+                            List<String> wordList2 = Arrays.asList(wordList1.get(1).split("\""));
+                            content.add(wordList2.get(0));
+                        }
+                        country = row_less.replaceAll("[^А-я]", "");
+                    } else {
+                        content.add(row_less);
+                    }
+                    counter++;
                 }
-                counter++;
-            }
-            if (content != null && content.size() > 0){
-                dict.put(country, content);
-                counter = 0;
-            }
+                if (content != null && content.size() > 0){
+                    dict.put(country, content);
+                    counter = 0;
+                }
 
-        }
-        return dict;
+            }
+            return dict;
+            }
+        return null;
     }
 
     public Map<String, ArrayList> getMedalsOfOneCountry(String country){
+        if (checkConnection()){
             Response html = p.get(this.url + String.format("country/profile/%s.html", country));
             Document document = Jsoup.parseBodyFragment(html.toString());
             ArrayList<String> urls = new ArrayList<>();
@@ -107,5 +106,7 @@ public class OlymParsing {
 
             }
             return dict;
+        }
+        return null;
     }
 }

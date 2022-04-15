@@ -8,6 +8,7 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/MainLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -19,4 +20,6 @@
     </LinearLayout>
 
     <include layout="@layout/bottom_sheet_persistent" />
+
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

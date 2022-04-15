@@ -1,4 +1,4 @@
-package com.example.mapyandex;
+package com.example.mapyandex.Requests;
 
 import org.json.JSONException;
 import org.json.JSONObject;
