@@ -43,7 +43,6 @@ import java.util.Locale;
 
 
 public class MainActivity extends AppCompatActivity implements GeoObjectTapListener, InputListener {
-    private final String MAPKIT_API_KEY = "26047576-121f-4108-a0be-a1c7e90cfde7";
     public static MapView mapView;
     public static String season;
     public static BottomSheetBehavior bottomSheetBehavior;
@@ -56,8 +55,6 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
     public static MainActivity ma;
     private static TextView t_x_message;
     public static Drawable img_of_search;
-    public static Bitmap nocImage;
-    public static String url_of_noc;
 
     public static ImageView FlagImage;
     public static ImageView NocImage;
@@ -69,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
     @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        String MAPKIT_API_KEY = "26047576-121f-4108-a0be-a1c7e90cfde7"; // !!!! не забыть убрать в файл в гитигноре
         MapKitFactory.setApiKey(MAPKIT_API_KEY);
         MapKitFactory.initialize(this);
         setContentView(R.layout.activity_main);
@@ -76,9 +74,6 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
         ma = MainActivity.this;
         t_x_message = new TextView(ma);
         t_x_message.setVisibility(View.INVISIBLE);
-
-
-
 
         tblayoutl = (TableLayout) findViewById(R.id.medalLayout);
         buttonlayout = (TableLayout) findViewById(R.id.buttonlayout);
@@ -97,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
         LinearLayout llBottomSheet = (LinearLayout) findViewById(R.id.bottomSheet);
 
         bottomSheetBehavior = BottomSheetBehavior.from(llBottomSheet);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_DRAGGING);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HALF_EXPANDED);
         bottomSheetBehavior.setPeekHeight(170);
         bottomSheetBehavior.setHideable(false);
 
@@ -164,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
             Toast toast = Toast.makeText(ma,
                     "ИНТЕРНЕТ КОНЭКШН ЭРРОР", Toast.LENGTH_SHORT);
             toast.show();
-            t_x_message.setText(" Тыкните для перезагрузки");
+            t_x_message.setText(" Ткните для перезагрузки");
             t_x_message.setTextSize(30);
             t_x_message.setGravity(View.TEXT_ALIGNMENT_CENTER);
             mapView.addView(t_x_message);
@@ -211,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements GeoObjectTapListe
         return bitmap;
     }
     public static Bitmap drawSimpleBitmap(String text, ImageView imv) {
-        int picSize = 600;
+        int picSize = 650;
         Bitmap bitmap = Bitmap.createBitmap(picSize, picSize, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();

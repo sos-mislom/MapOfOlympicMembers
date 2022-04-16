@@ -1,8 +1,6 @@
 package com.example.mapyandex.AsyncTasks;
 
-import static com.example.mapyandex.MainActivity.CoatImage;
 import static com.example.mapyandex.MainActivity.FlagImage;
-import static com.example.mapyandex.MainActivity.NocImage;
 import static com.example.mapyandex.MainActivity.bottomSheetBehavior;
 import static com.example.mapyandex.MainActivity.buttonlayout;
 import static com.example.mapyandex.MainActivity.clearTableView;
@@ -10,7 +8,6 @@ import static com.example.mapyandex.MainActivity.country;
 import static com.example.mapyandex.MainActivity.drawSimpleBitmap;
 import static com.example.mapyandex.MainActivity.geocoder;
 import static com.example.mapyandex.MainActivity.getAllMedals;
-import static com.example.mapyandex.MainActivity.ma;
 import static com.example.mapyandex.MainActivity.main_country;
 import static com.example.mapyandex.MainActivity.mapView;
 import static com.example.mapyandex.MainActivity.season;
@@ -20,14 +17,12 @@ import static com.example.mapyandex.MainActivity.thread;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.location.Address;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
